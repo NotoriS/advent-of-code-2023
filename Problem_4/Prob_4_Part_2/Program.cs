@@ -6,34 +6,25 @@ public class Problem
     public static void Main(string[] args)
     {
         List<string> lines = GetInputAsStringList();
-        Dictionary<int, int> cardInstances = new Dictionary<int, int>();
+        double sum = 0;
 
-        for (int i = 0; i < lines.Count; i++)
+        foreach (string line in lines)
         {
-            cardInstances[i] = 1;
-        }
-
-        for (int i = 0; i < lines.Count; i++)
-        {
-            HashSet<string> winningNumbers = lines[i].Split(':', '|')[1].Split(' ', '\t').ToHashSet();
+            HashSet<string> winningNumbers = line.Split(':', '|')[1].Split(' ', '\t').ToHashSet();
             winningNumbers.Remove("");
             winningNumbers.Remove("\t");
-            HashSet<string> myNumbers = lines[i].Split(':', '|')[2].Split(' ', '\t').ToHashSet();
+            HashSet<string> myNumbers = line.Split(':', '|')[2].Split(' ', '\t').ToHashSet();
             myNumbers.Remove("");
             myNumbers.Remove("\t");
 
             HashSet<string> common = myNumbers.Where(x => winningNumbers.Contains(x)).ToHashSet();
-
-            for (int j = 1; j <= common.Count && i + j < lines.Count; j++)
+            if (common.Count() > 0)
             {
-                cardInstances[i + j] += cardInstances[i];
+                sum += Math.Pow(2, common.Count - 1);
             }
         }
 
-        int finalCardCount = 0;
-        foreach (int instances in cardInstances.Values) finalCardCount += instances;
-
-        Console.WriteLine(finalCardCount);
+        Console.WriteLine(sum);
     }
 
     private static List<string> GetInputAsStringList()
