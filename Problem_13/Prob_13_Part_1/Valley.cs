@@ -64,7 +64,7 @@ public class Valley
 
     private bool VerifyReflection(List<string> list, int startIndex, int endIndex)
     {
-        while (startIndex < endIndex)
+        while (startIndex <= endIndex)
         {
             if (list[startIndex] != list[endIndex] || startIndex == endIndex)
             {
