@@ -1,5 +1,6 @@
 ﻿using System.IO;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 
 public class Problem
 {
@@ -33,56 +34,55 @@ public class Problem
 
     private static int FindDifferentArrangements(string record, List<int> groups)
     {
-        return FindDifferentArrangementsRec(0, record, groups, new List<Tuple<int, int>>());
+        return FindDifferentArrangementsRec(record.ToCharArray(), GroupListToRegex(groups));
     }
 
-    private static int FindDifferentArrangementsRec(int strIndex, string record, List<int> groups, List<Tuple<int, int>> debugHelper)
+    private static int FindDifferentArrangementsRec(char[] record, Regex pattern)
     {
-        // Create clones
-        groups = new List<int>(groups);
-        debugHelper = new List<Tuple<int, int>>(debugHelper);
-
-        if (groups.Count == 0)
+        if (!record.Contains('?'))
         {
-            if (strIndex - 1 < record.Length && record.Substring(strIndex - 1).Contains('#')) return 0;
-
-            // Debug print
-            for (int i = 0; i < record.Length; i++)
+            string recordStr = new string(record);
+            if (pattern.IsMatch(recordStr))
             {
-                if (debugHelper.Count > 0 && i == debugHelper[0].Item1)
-                {
-                    for (; i < debugHelper[0].Item1 + debugHelper[0].Item2; i++) Console.Write('#');
-                    i--;
-                    debugHelper.RemoveAt(0);
-                }
-                else
-                {
-                    Console.Write('.');
-                }
+                Console.WriteLine(recordStr);
+                return 1;
             }
-            Console.WriteLine();
-
-            return 1;
+            return 0;
         }
 
-        int sum = 0;
-        for (; strIndex + groups[0] - 1 < record.Length; strIndex++)
+        for (int i = 0; i < record.Length; i++)
         {
-            bool subStrCantBeThisGroup =
-                record.Substring(strIndex, groups[0]).Contains('.')
-                || (strIndex + groups[0] < record.Length && record[strIndex + groups[0]] == '#');
-            if (subStrCantBeThisGroup) continue;
+            if (record[i] == '?')
+            {
+                char[] replacedWithPeriod = new char[record.Length];
+                record.CopyTo(replacedWithPeriod, 0);
+                replacedWithPeriod[i] = '.';
 
-            List<int> nextGroups = new List<int>(groups);
-            nextGroups.RemoveAt(0);
+                char[] replacedWithHash = new char[record.Length];
+                record.CopyTo(replacedWithHash, 0);
+                replacedWithHash[i] = '#';
 
-            debugHelper.Add(Tuple.Create(strIndex, groups[0]));
-            sum += FindDifferentArrangementsRec(strIndex + groups[0] + 1, record, nextGroups, debugHelper);
-            debugHelper.RemoveAt(debugHelper.Count - 1);
-
-            if (record[strIndex] == '#') break;
+                return FindDifferentArrangementsRec(replacedWithPeriod, pattern) + FindDifferentArrangementsRec(replacedWithHash, pattern);
+            }
         }
 
-        return sum;
+        return 0;
+    }
+
+    private static Regex GroupListToRegex(List<int> groups)
+    {
+        groups = new List<int>(groups); // Clone list
+
+        string regex = "^\\.*";
+        while (groups.Count > 0)
+        {
+            int groupSize = groups[0];
+            groups.RemoveAt(0);
+
+            string regexSection = "#{" + groupSize + "}" + (groups.Count > 0 ? "\\.+" : "\\.*$");
+            regex = string.Concat(regex, regexSection);
+        }
+
+        return new Regex(regex);
     }
 }
