@@ -1,6 +1,5 @@
 ﻿using System.IO;
 using System.Collections.Generic;
-using System.Text.RegularExpressions;
 
 public class Problem
 {
@@ -23,10 +22,8 @@ public class Problem
         int sum = 0;
         for (int i = 0; i < springRecords.Count; i++)
         {
-            Console.WriteLine(lines[i] + ":"); // Debug print
             int next = FindDifferentArrangements(springRecords[i], springGroups[i]);
             sum += next;
-            Console.WriteLine(next + "\n"); // Debug print
         }
 
         Console.WriteLine(sum);
@@ -34,55 +31,41 @@ public class Problem
 
     private static int FindDifferentArrangements(string record, List<int> groups)
     {
-        return FindDifferentArrangementsRec(record.ToCharArray(), GroupListToRegex(groups));
+        return FindDifferentArrangementsRec(0, record, groups);
     }
 
-    private static int FindDifferentArrangementsRec(char[] record, Regex pattern)
+    private static int FindDifferentArrangementsRec(int strIndex, string record, List<int> groups)
     {
-        if (!record.Contains('?'))
+        // Create clones
+        groups = new List<int>(groups);
+
+        if (groups.Count == 0)
         {
-            string recordStr = new string(record);
-            if (pattern.IsMatch(recordStr))
+            if (strIndex - 1 < record.Length && record.Substring(strIndex - 1).Contains('#')) return 0;
+
+            return 1;
+        }
+
+        int sum = 0;
+        for (; strIndex + groups[0] - 1 < record.Length; strIndex++)
+        {
+            bool subStrCantBeThisGroup =
+                record.Substring(strIndex, groups[0]).Contains('.')
+                || (strIndex + groups[0] < record.Length && record[strIndex + groups[0]] == '#');
+            if (subStrCantBeThisGroup)
             {
-                Console.WriteLine(recordStr);
-                return 1;
+                if (record[strIndex] == '#') break;
+                continue;
             }
-            return 0;
+
+            List<int> nextGroups = new List<int>(groups);
+            nextGroups.RemoveAt(0);
+
+            sum += FindDifferentArrangementsRec(strIndex + groups[0] + 1, record, nextGroups);
+
+            if (record[strIndex] == '#') break;
         }
 
-        for (int i = 0; i < record.Length; i++)
-        {
-            if (record[i] == '?')
-            {
-                char[] replacedWithPeriod = new char[record.Length];
-                record.CopyTo(replacedWithPeriod, 0);
-                replacedWithPeriod[i] = '.';
-
-                char[] replacedWithHash = new char[record.Length];
-                record.CopyTo(replacedWithHash, 0);
-                replacedWithHash[i] = '#';
-
-                return FindDifferentArrangementsRec(replacedWithPeriod, pattern) + FindDifferentArrangementsRec(replacedWithHash, pattern);
-            }
-        }
-
-        return 0;
-    }
-
-    private static Regex GroupListToRegex(List<int> groups)
-    {
-        groups = new List<int>(groups); // Clone list
-
-        string regex = "^\\.*";
-        while (groups.Count > 0)
-        {
-            int groupSize = groups[0];
-            groups.RemoveAt(0);
-
-            string regexSection = "#{" + groupSize + "}" + (groups.Count > 0 ? "\\.+" : "\\.*$");
-            regex = string.Concat(regex, regexSection);
-        }
-
-        return new Regex(regex);
+        return sum;
     }
 }
