@@ -3,99 +3,135 @@ using System.Text;
 
 public class Crucible
 {
-    public int Row { get; private set; }
-    public int Col { get; private set; }
+    private int _row;
+    private int _col;
 
-    public Vector CurrentDirection { get; private set; }
-    public int ConsecutiveStraightMoves { get; private set; }
+    private Vector _currentDirection;
+    private int _consecutiveStraightMoves;
+
+    private HashSet<Tuple<int, int>> _visited;
+    
+    public int HeatLost { get; private set; }
 
     public Crucible(int startingRow, int startingCol, Vector startingDirection)
     {
-        Row = startingRow;
-        Col = startingCol;
-        CurrentDirection = startingDirection;
-        ConsecutiveStraightMoves = 0;
+        _visited = new HashSet<Tuple<int, int>>();
+        
+        _row = startingRow;
+        _col = startingCol;
+        _visited.Add(Tuple.Create(_row, _col));
+        _currentDirection = startingDirection;
+        _consecutiveStraightMoves = 0;
+        HeatLost = 0;
     }
 
     public Crucible(Crucible original)
     {
-        Row = original.Row;
-        Col = original.Col;
-        CurrentDirection = original.CurrentDirection;
-        ConsecutiveStraightMoves = original.ConsecutiveStraightMoves;
+        _row = original._row;
+        _col = original._col;
+        _visited = new HashSet<Tuple<int, int>>(original._visited);
+        _currentDirection = original._currentDirection;
+        _consecutiveStraightMoves = original._consecutiveStraightMoves;
+        HeatLost = original.HeatLost;
     }
 
-    public void Move(Direction direction)
+    public void Move(Direction direction, List<List<int>> grid)
     {
         switch (direction)
         {
             case Direction.Left:
-                switch (CurrentDirection)
+                switch (_currentDirection)
                 {
                     case Vector.Up:
-                        Col--;
-                        CurrentDirection = Vector.Left;
+                        _col--;
+                        _currentDirection = Vector.Left;
                         break;
                     case Vector.Down:
-                        Col++;
-                        CurrentDirection = Vector.Right;
+                        _col++;
+                        _currentDirection = Vector.Right;
                         break;
                     case Vector.Left:
-                        Row++;
-                        CurrentDirection = Vector.Down;
+                        _row++;
+                        _currentDirection = Vector.Down;
                         break;
                     case Vector.Right:
-                        Row--;
-                        CurrentDirection = Vector.Up;
+                        _row--;
+                        _currentDirection = Vector.Up;
                         break;
                 }
-                ConsecutiveStraightMoves = 1;
+                _consecutiveStraightMoves = 1;
                 break;
             case Direction.Right:
-                switch (CurrentDirection)
+                switch (_currentDirection)
                 {
                     case Vector.Up:
-                        Col++;
-                        CurrentDirection = Vector.Right;
+                        _col++;
+                        _currentDirection = Vector.Right;
                         break;
                     case Vector.Down:
-                        Col--;
-                        CurrentDirection = Vector.Left;
+                        _col--;
+                        _currentDirection = Vector.Left;
                         break;
                     case Vector.Left:
-                        Row--;
-                        CurrentDirection = Vector.Up;
+                        _row--;
+                        _currentDirection = Vector.Up;
                         break;
                     case Vector.Right:
-                        Row++;
-                        CurrentDirection = Vector.Down;
+                        _row++;
+                        _currentDirection = Vector.Down;
                         break;
                 }
-                ConsecutiveStraightMoves = 1;
+                _consecutiveStraightMoves = 1;
                 break;
             case Direction.Straight:
-                switch (CurrentDirection)
+                if (_consecutiveStraightMoves >= 3)
+                {
+                    HeatLost = int.MaxValue;
+                    return;
+                }
+                switch (_currentDirection)
                 {
                     case Vector.Up:
-                        Row--;
+                        _row--;
                         break;
                     case Vector.Down:
-                        Row++;
+                        _row++;
                         break;
                     case Vector.Left:
-                        Col--;
+                        _col--;
                         break;
                     case Vector.Right:
-                        Col++;
+                        _col++;
                         break;
                 }
-                ConsecutiveStraightMoves++;
+                _consecutiveStraightMoves++;
                 break;
         }
+
+        if (_visited.Any(pos => pos.Item1 == _row && pos.Item2 == _col))
+        {
+            HeatLost = int.MaxValue;
+            return;
+        }
+        
+        if (_row < 0 || _row >= grid.Count || _col < 0 || _col >= grid[0].Count)
+        {
+            HeatLost = int.MaxValue;
+        }
+        else
+        {
+            HeatLost += grid[_row][_col];
+            _visited.Add(Tuple.Create(_row, _col));
+        }
+    }
+
+    public bool IsAtEnd(List<List<int>> grid)
+    {
+        return _row == grid.Count - 1 && _col == grid[0].Count - 1;
     }
 
     public override string ToString()
     {
-        return Row + "," + Col + (ConsecutiveStraightMoves > 0 ? ",CanMoveStraight," : ",") + CurrentDirection;
+        return _row + "," + _col + (_consecutiveStraightMoves > 0 ? ",CanMoveStraight," : ",") + _currentDirection;
     }
 }
