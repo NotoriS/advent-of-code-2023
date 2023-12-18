@@ -12,73 +12,75 @@ public class Problem
             grid.Add(reader.ReadLine().ToCharArray().ToList().Select(e => int.Parse(e.ToString())).ToList());
         }
 
-        Console.WriteLine(FindShortestPath(grid));
-    }
-
-    private static int FindShortestPath(List<List<int>> grid)
-    {
-        Crucible first = new Crucible(0, 0, Vector.Right);
-        PriorityQueue<Crucible, int> paths = new PriorityQueue<Crucible, int>();
-        paths.Enqueue(first, first.HeatLost);
-
-        Dictionary<string, int> memoization = new Dictionary<string, int>();
-
-        int currentMinHeatLost = 0;
-        int closestPointToEnd = 0;
-        while (paths.Count > 0)
+        List<List<List<Dictionary<Vector, Vertex>>>> vertexLookup = new List<List<List<Dictionary<Vector, Vertex>>>>();
+        for (int row = 0; row < grid.Count; row++) 
         {
-            Crucible crucible = paths.Dequeue();
-
-            string crucibleStr = crucible.ToString();
-            if (memoization.ContainsKey(crucibleStr) && memoization[crucibleStr] < crucible.HeatLost) continue;
-            memoization[crucibleStr] = crucible.HeatLost;
-
-            if (crucible.HeatLost > currentMinHeatLost)
+            List<List<Dictionary<Vector, Vertex>>> rowList = new List<List<Dictionary<Vector, Vertex>>>();
+            for (int col = 0; col < grid[row].Count; col++)
             {
-                paths = CleanPathsQueue(paths, memoization);
-                currentMinHeatLost = crucible.HeatLost;
-                Console.WriteLine(currentMinHeatLost + "...");
+                List<Dictionary<Vector, Vertex>> colList = new List<Dictionary<Vector, Vertex>>();
+                for (int straightMoves = 1; straightMoves <= 3;  straightMoves++) 
+                {
+                    Dictionary<Vector, Vertex> smDict = new Dictionary<Vector, Vertex>();
+
+                    Vertex upOrientedVert = new Vertex(row, col, grid[row][col], straightMoves, Vector.Up);
+                    smDict[Vector.Up] = upOrientedVert;
+
+                    Vertex downOrientedVert = new Vertex(row, col, grid[row][col], straightMoves, Vector.Down);
+                    smDict[Vector.Down] = downOrientedVert;
+
+                    Vertex leftOrientedVert = new Vertex(row, col, grid[row][col], straightMoves, Vector.Left);
+                    smDict[Vector.Left] = leftOrientedVert;
+
+                    Vertex rightOrientedVert = new Vertex(row, col, grid[row][col], straightMoves, Vector.Right);
+                    smDict[Vector.Right] = rightOrientedVert;
+
+                    colList.Add(smDict);
+                }
+                rowList.Add(colList);
             }
-
-            if (crucible.Row + crucible.Col > closestPointToEnd)
-            {
-                closestPointToEnd = crucible.Row + crucible.Col;
-                Console.WriteLine($"{crucible.Row},{crucible.Col}...");
-            }
-
-            if (crucible.IsAtEnd(grid)) 
-            {
-                crucible.PrintVisited(grid);
-                return crucible.HeatLost; 
-            }
-            
-            Crucible moveLeft = new Crucible(crucible);
-            moveLeft.Move(Direction.Left, grid);
-            if (moveLeft.HeatLost < int.MaxValue) paths.Enqueue(moveLeft, moveLeft.HeatLost - (moveLeft.Row + moveLeft.Col));
-
-            Crucible moveRight = new Crucible(crucible);
-            moveRight.Move(Direction.Right, grid);
-            if (moveRight.HeatLost < int.MaxValue) paths.Enqueue(moveRight, moveRight.HeatLost - (moveRight.Row + moveRight.Col));
-
-            Crucible moveStraight = new Crucible(crucible);
-            moveStraight.Move(Direction.Straight, grid);
-            if (moveStraight.HeatLost < int.MaxValue) paths.Enqueue(moveStraight, moveStraight.HeatLost - (moveStraight.Row + moveStraight.Col));
+            vertexLookup.Add(rowList);
         }
 
-        return -1;
-    }
+        PriorityQueue<Vertex, int> pq = new PriorityQueue<Vertex, int>();
+        List<Vertex> visisted = new List<Vertex>();
 
-    private static PriorityQueue<Crucible, int> CleanPathsQueue(PriorityQueue<Crucible, int> paths, Dictionary<string, int> memoization)
-    {
-        PriorityQueue<Crucible, int> cleanQueue = new PriorityQueue<Crucible, int>();
-        while (paths.TryDequeue(out Crucible? crucible, out int priority))
+        Vertex start1 = vertexLookup[0][1][0][Vector.Right];
+        start1.ShortestPath = start1.Cost;
+        pq.Enqueue(start1, start1.ShortestPath);
+
+        Vertex start2 = vertexLookup[1][0][0][Vector.Down];
+        start2.ShortestPath = start2.Cost;
+        pq.Enqueue(start2, start2.ShortestPath);
+
+        int maxShortestPath = 0;
+        while (pq.Peek() != null && !(pq.Peek().Row == grid.Count - 1 && pq.Peek().Col == grid[0].Count - 1))
         {
-            if (!memoization.ContainsKey(crucible.ToString()) || memoization[crucible.ToString()] >= crucible.HeatLost)
+            Vertex current = pq.Dequeue();
+
+            if (!current.NeighborsAreSet)
             {
-                cleanQueue.Enqueue(crucible, priority);
+                current.SetNeighbors(vertexLookup);
             }
+
+            if (current.ShortestPath > maxShortestPath) 
+            {
+                maxShortestPath = current.ShortestPath;
+                Console.WriteLine(maxShortestPath + "...");
+            }
+
+            foreach (Vertex neighbor in current.Neighbors.Except(visisted))
+            {
+                if (current.ShortestPath + neighbor.Cost < neighbor.ShortestPath)
+                {
+                    neighbor.ShortestPath = current.ShortestPath + neighbor.Cost;
+                    pq.Enqueue(neighbor, neighbor.ShortestPath);
+                }
+            }
+
+            visisted.Add(current);
         }
 
-        return cleanQueue;
+        Console.WriteLine(pq.Peek().ShortestPath);
     }
 }
