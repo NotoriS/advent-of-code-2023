@@ -154,6 +154,6 @@ public class Crucible
 
     public override string ToString()
     {
-        return Row + "," + Col + "," + _consecutiveStraightMoves + (_consecutiveStraightMoves > 1 ? _currentDirection : "");
+        return Row + "," + Col + "," + _consecutiveStraightMoves + _currentDirection;
     }
 }

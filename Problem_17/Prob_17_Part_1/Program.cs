@@ -35,6 +35,7 @@ public class Problem
 
             if (crucible.HeatLost > currentMinHeatLost)
             {
+                paths = CleanPathsQueue(paths, memoization);
                 currentMinHeatLost = crucible.HeatLost;
                 Console.WriteLine(currentMinHeatLost + "...");
             }
@@ -53,17 +54,31 @@ public class Problem
             
             Crucible moveLeft = new Crucible(crucible);
             moveLeft.Move(Direction.Left, grid);
-            if (moveLeft.HeatLost < int.MaxValue) paths.Enqueue(moveLeft, moveLeft.HeatLost);
+            if (moveLeft.HeatLost < int.MaxValue) paths.Enqueue(moveLeft, moveLeft.HeatLost - (moveLeft.Row + moveLeft.Col));
 
             Crucible moveRight = new Crucible(crucible);
             moveRight.Move(Direction.Right, grid);
-            if (moveRight.HeatLost < int.MaxValue) paths.Enqueue(moveRight, moveRight.HeatLost);
+            if (moveRight.HeatLost < int.MaxValue) paths.Enqueue(moveRight, moveRight.HeatLost - (moveRight.Row + moveRight.Col));
 
             Crucible moveStraight = new Crucible(crucible);
             moveStraight.Move(Direction.Straight, grid);
-            if (moveStraight.HeatLost < int.MaxValue) paths.Enqueue(moveStraight, moveStraight.HeatLost);
+            if (moveStraight.HeatLost < int.MaxValue) paths.Enqueue(moveStraight, moveStraight.HeatLost - (moveStraight.Row + moveStraight.Col));
         }
 
         return -1;
+    }
+
+    private static PriorityQueue<Crucible, int> CleanPathsQueue(PriorityQueue<Crucible, int> paths, Dictionary<string, int> memoization)
+    {
+        PriorityQueue<Crucible, int> cleanQueue = new PriorityQueue<Crucible, int>();
+        while (paths.TryDequeue(out Crucible? crucible, out int priority))
+        {
+            if (!memoization.ContainsKey(crucible.ToString()) || memoization[crucible.ToString()] >= crucible.HeatLost)
+            {
+                cleanQueue.Enqueue(crucible, priority);
+            }
+        }
+
+        return cleanQueue;
     }
 }
