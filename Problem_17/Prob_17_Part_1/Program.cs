@@ -24,6 +24,7 @@ public class Problem
         Dictionary<string, int> memoization = new Dictionary<string, int>();
 
         int currentMinHeatLost = 0;
+        int closestPointToEnd = 0;
         while (paths.Count > 0)
         {
             Crucible crucible = paths.Dequeue();
@@ -36,6 +37,12 @@ public class Problem
             {
                 currentMinHeatLost = crucible.HeatLost;
                 Console.WriteLine(currentMinHeatLost + "...");
+            }
+
+            if (crucible.Row + crucible.Col > closestPointToEnd)
+            {
+                closestPointToEnd = crucible.Row + crucible.Col;
+                Console.WriteLine($"{crucible.Row},{crucible.Col}...");
             }
 
             if (crucible.IsAtEnd(grid)) 

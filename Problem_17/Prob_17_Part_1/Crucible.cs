@@ -3,8 +3,8 @@ using System.Text;
 
 public class Crucible
 {
-    private int _row;
-    private int _col;
+    public int Row { get; private set; }
+    public int Col { get; private set; }
 
     private Vector _currentDirection;
     private int _consecutiveStraightMoves;
@@ -17,9 +17,9 @@ public class Crucible
     {
         _visited = new HashSet<Tuple<int, int>>();
         
-        _row = startingRow;
-        _col = startingCol;
-        _visited.Add(Tuple.Create(_row, _col));
+        Row = startingRow;
+        Col = startingCol;
+        _visited.Add(Tuple.Create(Row, Col));
         _currentDirection = startingDirection;
         _consecutiveStraightMoves = 0;
         HeatLost = 0;
@@ -27,8 +27,8 @@ public class Crucible
 
     public Crucible(Crucible original)
     {
-        _row = original._row;
-        _col = original._col;
+        Row = original.Row;
+        Col = original.Col;
         _visited = new HashSet<Tuple<int, int>>(original._visited);
         _currentDirection = original._currentDirection;
         _consecutiveStraightMoves = original._consecutiveStraightMoves;
@@ -43,19 +43,19 @@ public class Crucible
                 switch (_currentDirection)
                 {
                     case Vector.Up:
-                        _col--;
+                        Col--;
                         _currentDirection = Vector.Left;
                         break;
                     case Vector.Down:
-                        _col++;
+                        Col++;
                         _currentDirection = Vector.Right;
                         break;
                     case Vector.Left:
-                        _row++;
+                        Row++;
                         _currentDirection = Vector.Down;
                         break;
                     case Vector.Right:
-                        _row--;
+                        Row--;
                         _currentDirection = Vector.Up;
                         break;
                 }
@@ -65,19 +65,19 @@ public class Crucible
                 switch (_currentDirection)
                 {
                     case Vector.Up:
-                        _col++;
+                        Col++;
                         _currentDirection = Vector.Right;
                         break;
                     case Vector.Down:
-                        _col--;
+                        Col--;
                         _currentDirection = Vector.Left;
                         break;
                     case Vector.Left:
-                        _row--;
+                        Row--;
                         _currentDirection = Vector.Up;
                         break;
                     case Vector.Right:
-                        _row++;
+                        Row++;
                         _currentDirection = Vector.Down;
                         break;
                 }
@@ -92,42 +92,42 @@ public class Crucible
                 switch (_currentDirection)
                 {
                     case Vector.Up:
-                        _row--;
+                        Row--;
                         break;
                     case Vector.Down:
-                        _row++;
+                        Row++;
                         break;
                     case Vector.Left:
-                        _col--;
+                        Col--;
                         break;
                     case Vector.Right:
-                        _col++;
+                        Col++;
                         break;
                 }
                 _consecutiveStraightMoves++;
                 break;
         }
 
-        if (_visited.Any(pos => pos.Item1 == _row && pos.Item2 == _col))
+        if (_visited.Any(pos => pos.Item1 == Row && pos.Item2 == Col))
         {
             HeatLost = int.MaxValue;
             return;
         }
         
-        if (_row < 0 || _row >= grid.Count || _col < 0 || _col >= grid[0].Count)
+        if (Row < 0 || Row >= grid.Count || Col < 0 || Col >= grid[0].Count)
         {
             HeatLost = int.MaxValue;
         }
         else
         {
-            HeatLost += grid[_row][_col];
-            _visited.Add(Tuple.Create(_row, _col));
+            HeatLost += grid[Row][Col];
+            _visited.Add(Tuple.Create(Row, Col));
         }
     }
 
     public bool IsAtEnd(List<List<int>> grid)
     {
-        return _row == grid.Count - 1 && _col == grid[0].Count - 1;
+        return Row == grid.Count - 1 && Col == grid[0].Count - 1;
     }
 
     public void PrintVisited(List<List<int>> grid)
@@ -154,6 +154,6 @@ public class Crucible
 
     public override string ToString()
     {
-        return _row + "," + _col + "," + _consecutiveStraightMoves;
+        return Row + "," + Col + "," + _consecutiveStraightMoves + (_consecutiveStraightMoves > 1 ? _currentDirection : "");
     }
 }
