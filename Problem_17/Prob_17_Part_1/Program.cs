@@ -21,17 +21,28 @@ public class Problem
         PriorityQueue<Crucible, int> paths = new PriorityQueue<Crucible, int>();
         paths.Enqueue(first, first.HeatLost);
 
+        Dictionary<string, int> memoization = new Dictionary<string, int>();
+
         int currentMinHeatLost = 0;
         while (paths.Count > 0)
         {
             Crucible crucible = paths.Dequeue();
+
+            string crucibleStr = crucible.ToString();
+            if (memoization.ContainsKey(crucibleStr) && memoization[crucibleStr] < crucible.HeatLost) continue;
+            memoization[crucibleStr] = crucible.HeatLost;
 
             if (crucible.HeatLost > currentMinHeatLost)
             {
                 currentMinHeatLost = crucible.HeatLost;
                 Console.WriteLine(currentMinHeatLost + "...");
             }
-            if (crucible.IsAtEnd(grid)) return crucible.HeatLost;
+
+            if (crucible.IsAtEnd(grid)) 
+            {
+                crucible.PrintVisited(grid);
+                return crucible.HeatLost; 
+            }
             
             Crucible moveLeft = new Crucible(crucible);
             moveLeft.Move(Direction.Left, grid);

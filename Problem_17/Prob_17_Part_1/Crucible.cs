@@ -130,8 +130,30 @@ public class Crucible
         return _row == grid.Count - 1 && _col == grid[0].Count - 1;
     }
 
+    public void PrintVisited(List<List<int>> grid)
+    {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < grid.Count; i++)
+        {
+            for (int j = 0; j < grid[i].Count; j++)
+            {
+                if (_visited.Any(pos => pos.Item1 == i && pos.Item2 == j))
+                {
+                    sb.Append('#');
+                }
+                else 
+                {
+                    sb.Append('.');
+                }
+            }
+            sb.Append('\n');
+        }
+
+        Console.WriteLine(sb.ToString());
+    }
+
     public override string ToString()
     {
-        return _row + "," + _col + (_consecutiveStraightMoves > 0 ? ",CanMoveStraight," : ",") + _currentDirection;
+        return _row + "," + _col + "," + _consecutiveStraightMoves;
     }
 }
