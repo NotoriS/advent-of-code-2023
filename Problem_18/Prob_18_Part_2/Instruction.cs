@@ -1,49 +1,68 @@
 ﻿
 public class Instruction
 {
-    private string _direction;
+    private Direction _direction;
     private int _distance;
 
     public Instruction(string direction, int distance)
     {
-        _direction = direction;
+        switch (direction)
+        {
+            case "3":
+                _direction = Direction.Up;
+                break;
+            case "1":
+                _direction = Direction.Down;
+                break;
+            case "2":
+                _direction = Direction.Left;
+                break;
+            case "0":
+                _direction = Direction.Right;
+                break;
+            default:
+                throw new Exception("Invalid direction.");
+        }
         _distance = distance;
     }
 
-    public void Execute(List<Tuple<Tuple<int, int>, Tuple<int, int>>> edges)
+    public void Execute(List<Vertex> vertices)
     {
-        Tuple<int, int> start;
-        Tuple<int, int> end;
+        Vertex start;
+        Vertex end;
 
         int offset = 0;
-        if (edges.Count == 0)
+        if (vertices.Count == 0)
         {
-            start = Tuple.Create(0, 0);
+            start = new Vertex(0, 0);
+            vertices.Add(start);
             offset = -1;
         }
         else
         {
-            start = edges.Last().Item2;
+            start = vertices.Last();
         }
+
+        start.ExitDirection = _direction;
 
         switch (_direction)
         {
-            case "U":
-                end = Tuple.Create(start.Item1 - _distance - offset, start.Item2);
+            case Direction.Up:
+                end = new Vertex(start.X, start.Y - _distance - offset, _direction);
                 break;
-            case "D":
-                end = Tuple.Create(start.Item1 + _distance + offset, start.Item2);
+            case Direction.Down:
+                end = new Vertex(start.X, start.Y + _distance + offset, _direction);
                 break;
-            case "L":
-                end = Tuple.Create(start.Item1, start.Item2 - _distance - offset);
+            case Direction.Left:
+                end = new Vertex(start.X - _distance - offset, start.Y, _direction);
                 break;
-            case "R":
-                end = Tuple.Create(start.Item1, start.Item2 + _distance + offset);
+            case Direction.Right:
+                end = new Vertex(start.X + _distance + offset, start.Y, _direction);
                 break;
             default:
                 throw new Exception("Invalid direction.");
         }
 
-        edges.Add(Tuple.Create(start, end));
+        vertices.Add(end);
     }
 }
