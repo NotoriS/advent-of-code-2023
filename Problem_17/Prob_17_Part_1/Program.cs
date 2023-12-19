@@ -43,7 +43,6 @@ public class Problem
         }
 
         PriorityQueue<Vertex, int> pq = new PriorityQueue<Vertex, int>();
-        List<Vertex> visisted = new List<Vertex>();
 
         Vertex start1 = vertexLookup[0][1][0][Vector.Right];
         start1.ShortestPath = start1.Cost;
@@ -58,19 +57,23 @@ public class Problem
         {
             Vertex current = pq.Dequeue();
 
+            if (current.Visited) continue;
+
             if (!current.NeighborsAreSet)
             {
                 current.SetNeighbors(vertexLookup);
             }
 
-            if (current.ShortestPath > maxShortestPath) 
+            if (current.ShortestPath > maxShortestPath)
             {
                 maxShortestPath = current.ShortestPath;
                 Console.WriteLine(maxShortestPath + "...");
             }
 
-            foreach (Vertex neighbor in current.Neighbors.Except(visisted))
+            foreach (Vertex neighbor in current.Neighbors)
             {
+                if (neighbor.Visited) continue;
+
                 if (current.ShortestPath + neighbor.Cost < neighbor.ShortestPath)
                 {
                     neighbor.ShortestPath = current.ShortestPath + neighbor.Cost;
@@ -78,7 +81,7 @@ public class Problem
                 }
             }
 
-            visisted.Add(current);
+            current.Visited = true;
         }
 
         Console.WriteLine(pq.Peek().ShortestPath);

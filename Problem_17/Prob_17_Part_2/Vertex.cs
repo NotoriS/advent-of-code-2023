@@ -13,6 +13,8 @@ public class Vertex
     public List<Vertex> Neighbors { get; private set; }
     public bool NeighborsAreSet { get; private set; }
 
+    public bool Visited { get; set; }
+
     public Vertex(int row, int col, int cost, int straightMoves, Vector direction)
     {
         Neighbors = new List<Vertex>();
@@ -25,6 +27,7 @@ public class Vertex
         Direction = direction;
 
         ShortestPath = int.MaxValue;
+        Visited = false;
     }
 
     public void SetNeighbors(List<List<List<Dictionary<Vector, Vertex>>>> neighborLookup)
