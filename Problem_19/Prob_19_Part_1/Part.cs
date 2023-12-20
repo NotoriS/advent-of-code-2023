@@ -6,6 +6,8 @@ public class Part
     public int A { get; private set; }
     public int S { get; private set; }
 
+    public int XMAS { get { return X + M + A + S; } }
+
     public Part(string str)
     {
         str = str.Remove(str.Length - 1);

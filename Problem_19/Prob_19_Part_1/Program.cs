@@ -23,5 +23,20 @@ public class Problem
         {
             parts.Add(new Part(reader.ReadLine()));
         }
+
+        long sum = 0;
+        
+        foreach (Part part in parts)
+        {
+            string destination = "in";
+            while (destination != "A" && destination != "R")
+            {
+                destination = workflows[destination].Execute(part);
+            }
+
+            if (destination == "A") sum += part.XMAS;
+        }
+
+        Console.WriteLine(sum);
     }
 }
