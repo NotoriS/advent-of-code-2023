@@ -1,58 +1,104 @@
 ﻿
 public class PartRange
 {
-    public int MinX { get; set; }
-    public int MaxX { get; set; }
+    public const int MAX_RANGE_SIZE = 4000;
+    public static bool[] TrueArray = Enumerable.Repeat(true, MAX_RANGE_SIZE).ToArray();
 
-    public int MinM { get; set; }
-    public int MaxM { get; set; }
-
-    public int MinA { get; set; }
-    public int MaxA { get; set; }
-
-    public int MinS { get; set; }
-    public int MaxS { get; set; }
+    public bool[] ValidX { get; private set; }
+    public bool[] ValidM { get; private set; }
+    public bool[] ValidA { get; private set; }
+    public bool[] ValidS { get; private set; }
 
     public string Destination { get; set; }
 
-    public bool HasValues
-    {
-        get { return MinX <= MaxX && MinM <= MaxM && MinA <= MaxA && MinS <= MaxS; }
-    }
-
     public PartRange()
     {
-        MinX = 1;
-        MaxX = 4000;
+        ValidX = new bool[MAX_RANGE_SIZE];
+        Array.Copy(TrueArray, ValidX, MAX_RANGE_SIZE);
 
-        MinM = 1;
-        MaxM = 4000;
+        ValidM = new bool[MAX_RANGE_SIZE];
+        Array.Copy(TrueArray, ValidM, MAX_RANGE_SIZE);
 
-        MinA = 1;
-        MaxA = 4000;
+        ValidA = new bool[MAX_RANGE_SIZE];
+        Array.Copy(TrueArray, ValidA, MAX_RANGE_SIZE);
 
-        MinS = 1;
-        MaxS = 4000;
+        ValidS = new bool[MAX_RANGE_SIZE];
+        Array.Copy(TrueArray, ValidS, MAX_RANGE_SIZE);
 
         Destination = "";
     }
 
-    public PartRange Combine(PartRange other)
+    public PartRange(PartRange original)
     {
-        PartRange newRange = new PartRange();
+        ValidX = new bool[MAX_RANGE_SIZE];
+        Array.Copy(original.ValidX, ValidX, MAX_RANGE_SIZE);
 
-        newRange.MinX = Math.Max(MinX, other.MinX);
-        newRange.MaxX = Math.Min(MaxX, other.MaxX);
+        ValidM = new bool[MAX_RANGE_SIZE];
+        Array.Copy(original.ValidM, ValidM, MAX_RANGE_SIZE);
 
-        newRange.MinM = Math.Max(MinM, other.MinM);
-        newRange.MaxM = Math.Min(MaxM, other.MaxM);
+        ValidA = new bool[MAX_RANGE_SIZE];
+        Array.Copy(original.ValidA, ValidA, MAX_RANGE_SIZE);
 
-        newRange.MinA = Math.Max(MinA, other.MinA);
-        newRange.MaxA = Math.Min(MaxA, other.MaxA);
+        ValidS = new bool[MAX_RANGE_SIZE];
+        Array.Copy(original.ValidS, ValidS, MAX_RANGE_SIZE);
 
-        newRange.MinS = Math.Max(MinS, other.MinS);
-        newRange.MaxS = Math.Min(MaxS, other.MaxS);
+        Destination = "";
+    }
 
-        return newRange;
+    public PartRange ApplyMask(Mask mask) 
+    {
+        PartRange result = new PartRange(this);
+
+        switch (mask.Letter)
+        {
+            case "x":
+                for (int i = 0; i < MAX_RANGE_SIZE; i++)
+                {
+                    result.ValidX[i] = ValidX[i] && mask.Valid[i];
+                }
+                break;
+            case "m":
+                for (int i = 0; i < MAX_RANGE_SIZE; i++)
+                {
+                    result.ValidM[i] = ValidM[i] && mask.Valid[i];
+                }
+                break;
+            case "a":
+                for (int i = 0; i < MAX_RANGE_SIZE; i++)
+                {
+                    result.ValidA[i] = ValidA[i] && mask.Valid[i];
+                }
+                break;
+            case "s":
+                for (int i = 0; i < MAX_RANGE_SIZE; i++)
+                {
+                    result.ValidS[i] = ValidS[i] && mask.Valid[i];
+                }
+                break;
+            default:
+                break;
+        }
+
+        return result;
+    }
+
+    public long GetTotalInRange()
+    {
+        long xCount = ValidX.Where(e => e).Count();
+        long mCount = ValidM.Where(e => e).Count();
+        long aCount = ValidA.Where(e => e).Count();
+        long sCount = ValidS.Where(e => e).Count();
+
+        return xCount * mCount * aCount * sCount;
+    }
+
+    public override string ToString()
+    {
+        int xCount = ValidX.Where(e => e).Count();
+        int mCount = ValidM.Where(e => e).Count();
+        int aCount = ValidA.Where(e => e).Count();
+        int sCount = ValidS.Where(e => e).Count();
+
+        return $"x={xCount},m={mCount},a={aCount},s={sCount}";
     }
 }

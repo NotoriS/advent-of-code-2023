@@ -5,11 +5,8 @@ public class UntestedRule : Rule
     {
     }
 
-    public override PartRange Test(PartRange range)
+    public override Mask Test()
     {
-        PartRange overlap = range.Combine(new PartRange());
-        overlap.Destination = Destination;
-
-        return overlap;
+        return new Mask();
     }
 }

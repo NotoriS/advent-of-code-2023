@@ -17,7 +17,14 @@ public class Workflow
         List<PartRange> result = new List<PartRange>();
         foreach (Rule rule in _rules)
         {
-            result.Add(rule.Test(range));
+            Mask mask = rule.Test();
+            Mask reverseMask = mask.Opposite();
+
+            PartRange added = range.ApplyMask(mask);
+            added.Destination = rule.Destination;
+            result.Add(added);
+
+            range = range.ApplyMask(reverseMask);
         }
 
         return result;

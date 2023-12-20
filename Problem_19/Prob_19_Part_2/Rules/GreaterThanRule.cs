@@ -5,31 +5,11 @@ public class GreaterThanRule : ComparisonRule
     {
     }
 
-    public override PartRange Test(PartRange range)
+    public override Mask Test()
     {
-        PartRange newRange = new PartRange();
-
-        switch (_comparisonLetter)
-        {
-            case "x":
-                newRange.MinX = _comparisonValue + 1;
-                break;
-            case "m":
-                newRange.MinM = _comparisonValue + 1;
-                break;
-            case "a":
-                newRange.MinA = _comparisonValue + 1;
-                break;
-            case "s":
-                newRange.MinS = _comparisonValue + 1;
-                break;
-            default:
-                throw new InvalidDataException("Invalid comparison letter.");
-        }
-
-        PartRange overlap = range.Combine(newRange);
-        overlap.Destination = Destination;
-
-        return overlap;
+        Mask result = new Mask();
+        for (int i = 0; i < _comparisonValue; i++) result.Valid[i] = false;
+        result.Letter = _comparisonLetter;
+        return result;
     }
 }

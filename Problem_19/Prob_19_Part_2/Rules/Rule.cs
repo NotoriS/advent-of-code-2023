@@ -8,5 +8,5 @@ public abstract class Rule
         Destination = destination;
     }
 
-    public abstract PartRange Test(PartRange range);
+    public abstract Mask Test();
 }
