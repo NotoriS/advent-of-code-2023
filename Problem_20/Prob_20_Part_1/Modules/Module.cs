@@ -1,10 +1,12 @@
 ﻿
 public abstract class Module
 {
-    private List<string> _destinations;
+    protected string _name;
+    protected List<string> _destinations;
 
-    protected Module(List<string> destinations)
+    protected Module(string name, List<string> destinations)
     {
+        _name = name;
         _destinations = new List<string>(destinations);
     }
 

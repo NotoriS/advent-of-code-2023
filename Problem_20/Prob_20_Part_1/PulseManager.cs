@@ -5,10 +5,10 @@ public class PulseManager
 
     private Queue<Pulse> _pulseQueue;
 
-    private static PulseManager _instance;
-
     public long LowPulseCount { get; private set; }
     public long HighPulseCount { get; private set; }
+
+    private static PulseManager _instance;
 
     public static PulseManager Instance
     {
@@ -55,7 +55,10 @@ public class PulseManager
             if (pulse.Type == PulseType.Low) LowPulseCount++;
             if (pulse.Type == PulseType.High) HighPulseCount++;
 
-            _modules[pulse.Destination].RecievePulse(pulse);
+            if (_modules.ContainsKey(pulse.Destination))
+            {
+                _modules[pulse.Destination].RecievePulse(pulse);
+            }
         }
     }
 
@@ -64,23 +67,24 @@ public class PulseManager
         _pulseQueue.Enqueue(pulse);
     }
 
-    private Module CreateModule(string line)
+    private void CreateModule(string line)
     {
         string identifier = line.Split(" -> ")[0];
         List<string> destinations = line.Split(" -> ")[1].Split(", ").ToList();
 
         if (identifier.StartsWith('%'))
         {
-            // TODO: Create flip-flip module and add to dictionary.
+            string name = identifier.Substring(1);
+            _modules.Add(name, new FlipFlopModule(name, destinations));
         }
         else if (identifier.StartsWith('&'))
         {
-            // TODO: Create conjunction module and add to dictionary.
+            string name = identifier.Substring(1);
+            _modules.Add(name, new ConjunctionModule(name, destinations));
         }
         else
         {
-            // TODO: Create broadcaster module and add to dictionary.
+            _modules.Add(identifier, new BroadcastModule(identifier, destinations));
         }
-        return null;
     }
 }
