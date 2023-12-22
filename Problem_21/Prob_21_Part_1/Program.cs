@@ -1,7 +1,7 @@
 ﻿
 public class Problem
 {
-    public const int STEPS = 26501365;
+    public const int STEPS = 64;
 
     public static void Main(string[] args)
     {
