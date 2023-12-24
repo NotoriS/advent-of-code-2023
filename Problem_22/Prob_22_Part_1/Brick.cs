@@ -65,23 +65,6 @@ public class Brick
         if (brick != this) _below.Add(brick);
     }
 
-    //public void FallToHeight(int height)
-    //{
-    //    int currentX1 = _x1;
-    //    int currentX2 = _x2;
-
-    //    if (currentX1 < _x1)
-    //    {
-    //        _x1 = height;
-    //        _x2 = height + currentX2 - currentX1;
-    //    }
-    //    else
-    //    {
-    //        _x2 = height;
-    //        _x1 = height + currentX1 - currentX2;
-    //    }
-    //}
-
     public override string ToString()
     {
         return $"{X1},{Y1},{Z1}~{X2},{Y2},{Z2}";
